@@ -126,6 +126,36 @@ describe("piiGuard", () => {
     );
     expect(result.passed).toBe(true);
   });
+
+  it("detects valid credit card numbers", async () => {
+    const guard = piiGuard("text");
+    // Visa test number (passes Luhn)
+    const result = await evaluateArgGuards(
+      [guard],
+      ctx({ text: "Card: 4111 1111 1111 1111" }),
+    );
+    expect(result.passed).toBe(false);
+    expect(result.violations[0]!.message).toContain("credit-card");
+  });
+
+  it("ignores non-card digit sequences that fail Luhn", async () => {
+    const guard = piiGuard("text");
+    // Timestamp-like number that starts with 4 but fails Luhn
+    const result = await evaluateArgGuards(
+      [guard],
+      ctx({ text: "Record ID: 4111111111111112" }),
+    );
+    expect(result.passed).toBe(true);
+  });
+
+  it("ignores digit sequences without card network prefix", async () => {
+    const guard = piiGuard("text");
+    const result = await evaluateArgGuards(
+      [guard],
+      ctx({ text: "Timestamp: 1702012345678901" }),
+    );
+    expect(result.passed).toBe(true);
+  });
 });
 
 describe("nested field access", () => {
