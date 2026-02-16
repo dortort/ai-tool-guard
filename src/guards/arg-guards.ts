@@ -7,6 +7,7 @@
 
 import type { z } from "zod";
 import type { ArgGuard, PolicyContext, ZodArgGuard } from "../types.js";
+import { passesLuhn } from "../utils/index.js";
 
 // ---------------------------------------------------------------------------
 // Built-in argument guard factories
@@ -105,7 +106,11 @@ export function regexGuard(
 // ---------------------------------------------------------------------------
 
 /** Common PII patterns. */
-const PII_PATTERNS: Array<{ name: string; pattern: RegExp }> = [
+const PII_PATTERNS: Array<{
+  name: string;
+  pattern: RegExp;
+  validate?: (match: string) => boolean;
+}> = [
   {
     name: "email",
     pattern: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/,
@@ -113,7 +118,8 @@ const PII_PATTERNS: Array<{ name: string; pattern: RegExp }> = [
   { name: "ssn", pattern: /\b\d{3}-\d{2}-\d{4}\b/ },
   {
     name: "credit-card",
-    pattern: /\b(?:\d[ -]*?){13,19}\b/,
+    pattern: /\b(?:4\d{3}|5[1-5]\d{2}|3[47]\d{2}|6(?:011|5\d{2}))[ -]?(?:\d[ -]?){8,14}\d\b/,
+    validate: passesLuhn,
   },
   { name: "phone-us", pattern: /\b\(?[2-9]\d{2}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/ },
   { name: "ip-address", pattern: /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/ },
@@ -132,9 +138,11 @@ export function piiGuard(
     validate(value: unknown) {
       if (typeof value !== "string") return null;
 
-      for (const { name, pattern } of PII_PATTERNS) {
+      for (const { name, pattern, validate } of PII_PATTERNS) {
         if (allowed.has(name)) continue;
-        if (pattern.test(value)) {
+        const match = value.match(pattern);
+        if (match) {
+          if (validate && !validate(match[0])) continue;
           return `Potential PII detected in "${field}": ${name}`;
         }
       }
