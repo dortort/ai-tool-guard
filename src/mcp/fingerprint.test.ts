@@ -94,4 +94,29 @@ describe("FingerprintStore", () => {
     expect(store.delete("s1", "tool")).toBe(true);
     expect(store.get("s1", "tool")).toBeUndefined();
   });
+
+  it("rejects non-array JSON on import", () => {
+    const store = new FingerprintStore();
+    expect(() => store.import('{"not": "an array"}')).toThrow(
+      "expected a JSON array",
+    );
+  });
+
+  it("rejects entries missing required fields on import", () => {
+    const store = new FingerprintStore();
+    const malformed = JSON.stringify([{ toolName: "t" }]); // missing serverId, schemaHash, pinnedAt
+    expect(() => store.import(malformed)).toThrow(
+      "invalid fingerprint at index 0",
+    );
+  });
+
+  it("rejects entries with wrong field types on import", () => {
+    const store = new FingerprintStore();
+    const wrongTypes = JSON.stringify([
+      { toolName: 123, serverId: "s", schemaHash: "h", pinnedAt: "p" },
+    ]);
+    expect(() => store.import(wrongTypes)).toThrow(
+      "invalid fingerprint at index 0",
+    );
+  });
 });

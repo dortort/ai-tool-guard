@@ -159,11 +159,32 @@ export class FingerprintStore {
     return JSON.stringify(this.getAll(), null, 2);
   }
 
-  /** Import fingerprints from JSON. */
+  /** Import fingerprints from JSON. Validates required fields on each entry. */
   import(json: string): void {
-    const fps: McpToolFingerprint[] = JSON.parse(json);
-    for (const fp of fps) {
-      this.set(fp);
+    const parsed: unknown = JSON.parse(json);
+
+    if (!Array.isArray(parsed)) {
+      throw new Error(
+        "FingerprintStore.import(): expected a JSON array of fingerprints.",
+      );
+    }
+
+    for (let i = 0; i < parsed.length; i++) {
+      const entry = parsed[i] as Record<string, unknown>;
+      if (
+        !entry ||
+        typeof entry !== "object" ||
+        typeof entry.toolName !== "string" ||
+        typeof entry.serverId !== "string" ||
+        typeof entry.schemaHash !== "string" ||
+        typeof entry.pinnedAt !== "string"
+      ) {
+        throw new Error(
+          `FingerprintStore.import(): invalid fingerprint at index ${i}. ` +
+            "Each entry must have toolName, serverId, schemaHash, and pinnedAt as strings.",
+        );
+      }
+      this.set(entry as unknown as McpToolFingerprint);
     }
   }
 }
