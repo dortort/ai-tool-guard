@@ -70,6 +70,23 @@ describe("piiOutputFilter", () => {
     const result = await filter.filter("user@example.com", ctx());
     expect(result.verdict).toBe("pass");
   });
+
+  it("redacts valid credit card numbers", async () => {
+    const filter = piiOutputFilter();
+    // Visa test number (passes Luhn)
+    const result = await filter.filter("Card: 4111 1111 1111 1111", ctx());
+    expect(result.verdict).toBe("redact");
+    expect(result.output).toContain("[CARD REDACTED]");
+    expect(result.redactedFields).toContain("credit-card");
+  });
+
+  it("does not redact digit sequences that fail Luhn check", async () => {
+    const filter = piiOutputFilter();
+    // Same prefix but fails Luhn
+    const result = await filter.filter("ID: 4111111111111112", ctx());
+    expect(result.verdict).toBe("pass");
+    expect(result.output).toBe("ID: 4111111111111112");
+  });
 });
 
 describe("runOutputFilters", () => {
