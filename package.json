@@ -71,9 +71,10 @@
     }
   },
   "devDependencies": {
-    "@opentelemetry/api": "^1.9.0",
-    "ai": "^4.3.0",
     "@ai-sdk/provider": "^1.1.0",
+    "@opentelemetry/api": "^1.9.0",
+    "@types/node": "^25.2.3",
+    "ai": "^4.3.0",
     "typescript": "^5.7.0",
     "vitest": "^3.0.0",
     "zod": "^3.24.0"
