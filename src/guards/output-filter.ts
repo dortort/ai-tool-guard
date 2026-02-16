@@ -6,6 +6,7 @@
  */
 
 import type { OutputFilter, OutputFilterResult, PolicyContext } from "../types.js";
+import { passesLuhn } from "../utils/index.js";
 
 // ---------------------------------------------------------------------------
 // Built-in output filters
@@ -19,6 +20,8 @@ export interface RedactionRule {
   pattern: RegExp;
   /** Replacement string. Default: "[REDACTED]". */
   replacement?: string;
+  /** Optional post-match validation. Return true to confirm the match is real. */
+  validate?: (match: string) => boolean;
 }
 
 /** Common secret patterns for output redaction. */
@@ -85,8 +88,9 @@ export function piiOutputFilter(
   if (!allowed.has("credit-card")) {
     piiRules.push({
       name: "credit-card",
-      pattern: /\b(?:\d[ -]*?){13,19}\b/g,
+      pattern: /\b(?:4\d{3}|5[1-5]\d{2}|3[47]\d{2}|6(?:011|5\d{2}))[ -]?(?:\d[ -]?){8,14}\d\b/g,
       replacement: "[CARD REDACTED]",
+      validate: passesLuhn,
     });
   }
 
@@ -179,12 +183,28 @@ function redactValue(
   if (typeof value === "string") {
     let text = value;
     for (const rule of rules) {
-      // Reset lastIndex for global regex.
       rule.pattern.lastIndex = 0;
-      if (rule.pattern.test(text)) {
-        redactedFields.push(rule.name);
+      if (rule.validate) {
+        // Use replacer function for rules with post-match validation.
+        let matched = false;
         rule.pattern.lastIndex = 0;
-        text = text.replace(rule.pattern, rule.replacement ?? "[REDACTED]");
+        text = text.replace(rule.pattern, (m) => {
+          if (rule.validate!(m)) {
+            matched = true;
+            return rule.replacement ?? "[REDACTED]";
+          }
+          return m;
+        });
+        if (matched) {
+          redactedFields.push(rule.name);
+        }
+      } else {
+        rule.pattern.lastIndex = 0;
+        if (rule.pattern.test(text)) {
+          redactedFields.push(rule.name);
+          rule.pattern.lastIndex = 0;
+          text = text.replace(rule.pattern, rule.replacement ?? "[REDACTED]");
+        }
       }
     }
     return { output: text, redactedFields };
