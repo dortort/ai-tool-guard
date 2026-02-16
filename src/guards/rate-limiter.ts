@@ -24,52 +24,54 @@ export class RateLimiter {
     config: RateLimitConfig,
     maxConcurrency?: number,
   ): Promise<RateLimitAcquireResult> {
-    const now = Date.now();
-    let state = this.state.get(toolName);
+    // Loop instead of recursion to avoid stack overflow under contention.
+    for (;;) {
+      const now = Date.now();
+      let state = this.state.get(toolName);
 
-    if (!state) {
-      state = { timestamps: [], activeCalls: 0 };
-      this.state.set(toolName, state);
-    }
-
-    // Slide the window: remove timestamps outside the window.
-    state.timestamps = state.timestamps.filter(
-      (t) => now - t < config.windowMs,
-    );
-
-    // Check rate limit.
-    if (state.timestamps.length >= config.maxCalls) {
-      if (config.strategy === "queue") {
-        await this.enqueue(toolName);
-        // Re-check after dequeue.
-        return this.acquire(toolName, config, maxConcurrency);
+      if (!state) {
+        state = { timestamps: [], activeCalls: 0 };
+        this.state.set(toolName, state);
       }
-      const retryAfterMs =
-        config.windowMs - (now - state.timestamps[0]!);
-      return {
-        allowed: false,
-        reason: `Rate limit exceeded for "${toolName}": ${config.maxCalls} calls per ${config.windowMs}ms.`,
-        retryAfterMs,
-      };
-    }
 
-    // Check concurrency.
-    if (maxConcurrency != null && state.activeCalls >= maxConcurrency) {
-      if (config.strategy === "queue") {
-        await this.enqueue(toolName);
-        return this.acquire(toolName, config, maxConcurrency);
+      // Slide the window: remove timestamps outside the window.
+      state.timestamps = state.timestamps.filter(
+        (t) => now - t < config.windowMs,
+      );
+
+      // Check rate limit.
+      if (state.timestamps.length >= config.maxCalls) {
+        if (config.strategy === "queue") {
+          await this.enqueue(toolName);
+          continue; // Re-check after dequeue.
+        }
+        const retryAfterMs =
+          config.windowMs - (now - state.timestamps[0]!);
+        return {
+          allowed: false,
+          reason: `Rate limit exceeded for "${toolName}": ${config.maxCalls} calls per ${config.windowMs}ms.`,
+          retryAfterMs,
+        };
       }
-      return {
-        allowed: false,
-        reason: `Concurrency limit exceeded for "${toolName}": max ${maxConcurrency}.`,
-      };
+
+      // Check concurrency.
+      if (maxConcurrency != null && state.activeCalls >= maxConcurrency) {
+        if (config.strategy === "queue") {
+          await this.enqueue(toolName);
+          continue; // Re-check after dequeue.
+        }
+        return {
+          allowed: false,
+          reason: `Concurrency limit exceeded for "${toolName}": max ${maxConcurrency}.`,
+        };
+      }
+
+      // Acquire.
+      state.timestamps.push(now);
+      state.activeCalls++;
+
+      return { allowed: true };
     }
-
-    // Acquire.
-    state.timestamps.push(now);
-    state.activeCalls++;
-
-    return { allowed: true };
   }
 
   /**
