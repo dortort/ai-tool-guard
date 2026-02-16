@@ -116,6 +116,11 @@ async function evaluateRules(
     (a, b) => (b.priority ?? 0) - (a.priority ?? 0),
   );
 
+  // Evaluate all matching rules and keep the most restrictive verdict.
+  let bestVerdict: DecisionVerdict | null = null;
+  let bestReason = "";
+  const allMatchedRules: string[] = [];
+
   for (const rule of sorted) {
     // Check tool pattern match.
     const patternMatch = rule.toolPatterns.some((p) =>
@@ -134,15 +139,25 @@ async function evaluateRules(
       if (!condResult) continue;
     }
 
-    // Rule matched.
-    return {
-      verdict: rule.verdict,
-      matchedRules: [rule.id],
-      reason: rule.description ?? `Matched rule "${rule.id}".`,
-    };
+    // Rule matched — track it and escalate if more restrictive.
+    allMatchedRules.push(rule.id);
+
+    if (
+      bestVerdict === null ||
+      VERDICT_SEVERITY[rule.verdict] > VERDICT_SEVERITY[bestVerdict]
+    ) {
+      bestVerdict = rule.verdict;
+      bestReason = rule.description ?? `Matched rule "${rule.id}".`;
+    }
   }
 
-  return null;
+  if (bestVerdict === null) return null;
+
+  return {
+    verdict: bestVerdict,
+    matchedRules: allMatchedRules,
+    reason: bestReason,
+  };
 }
 
 // ---------------------------------------------------------------------------
