@@ -8,6 +8,7 @@
  * Falls back to a no-op tracer when @opentelemetry/api is not installed.
  */
 
+import { createRequire } from "node:module";
 import type { DecisionRecord, OtelConfig } from "../types.js";
 
 // ---------------------------------------------------------------------------
@@ -63,6 +64,10 @@ class NoopTracer implements Tracer {
   }
 }
 
+/** Cached tracer to avoid repeated import attempts. */
+let cachedTracer: Tracer | null = null;
+let cachedTracerName: string | undefined;
+
 /**
  * Attempt to load the real OTel tracer, falling back to noop.
  */
@@ -71,15 +76,23 @@ export function createTracer(config?: OtelConfig): Tracer {
     return new NoopTracer();
   }
 
+  const tracerName = config?.tracerName ?? "ai-tool-guard";
+
+  if (cachedTracer && cachedTracerName === tracerName) {
+    return cachedTracer;
+  }
+
   try {
-    // Dynamic import of optional peer dependency.
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const otelApi = require("@opentelemetry/api") as typeof import("@opentelemetry/api");
-    return otelApi.trace.getTracer(
-      config?.tracerName ?? "ai-tool-guard",
-    ) as unknown as Tracer;
+    // Use createRequire for ESM compatibility with optional peer dependency.
+    const req = createRequire(import.meta.url);
+    const otelApi = req("@opentelemetry/api") as typeof import("@opentelemetry/api");
+    cachedTracer = otelApi.trace.getTracer(tracerName) as unknown as Tracer;
+    cachedTracerName = tracerName;
+    return cachedTracer;
   } catch {
-    return new NoopTracer();
+    cachedTracer = new NoopTracer();
+    cachedTracerName = tracerName;
+    return cachedTracer;
   }
 }
 
