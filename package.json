@@ -1,0 +1,81 @@
+{
+  "name": "ai-tool-guard",
+  "version": "0.1.0",
+  "description": "Policy enforcement middleware for Vercel AI SDK tool calls — guards, approvals, rate limiting, output filtering, and observability.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./policy": {
+      "import": "./dist/policy/index.js",
+      "types": "./dist/policy/index.d.ts"
+    },
+    "./approval": {
+      "import": "./dist/approval/index.js",
+      "types": "./dist/approval/index.d.ts"
+    },
+    "./guards": {
+      "import": "./dist/guards/index.js",
+      "types": "./dist/guards/index.d.ts"
+    },
+    "./otel": {
+      "import": "./dist/otel/index.js",
+      "types": "./dist/otel/index.d.ts"
+    },
+    "./mcp": {
+      "import": "./dist/mcp/index.js",
+      "types": "./dist/mcp/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dortort/ai-tool-guard"
+  },
+  "keywords": [
+    "ai",
+    "vercel-ai-sdk",
+    "guardrails",
+    "tool-calling",
+    "policy-engine",
+    "mcp",
+    "opentelemetry",
+    "rate-limiting",
+    "approval-flow"
+  ],
+  "author": "Francis Eytan Dortort",
+  "license": "MIT",
+  "peerDependencies": {
+    "ai": ">=4.0.0",
+    "zod": ">=3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@opentelemetry/api": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@opentelemetry/api": "^1.9.0",
+    "ai": "^4.3.0",
+    "@ai-sdk/provider": "^1.1.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0",
+    "zod": "^3.24.0"
+  }
+}
