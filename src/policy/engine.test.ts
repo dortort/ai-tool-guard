@@ -136,6 +136,65 @@ describe("evaluatePolicy", () => {
     const decision = await evaluatePolicy(ctx(), {});
     expect(decision.evalDurationMs).toBeGreaterThanOrEqual(0);
   });
+
+  it("escalates from backend allow to rules deny when both are configured", async () => {
+    const backend: PolicyBackend = {
+      name: "test-backend",
+      async evaluate() {
+        return {
+          verdict: "allow",
+          reason: "Backend allows",
+          matchedRules: ["b1"],
+        };
+      },
+    };
+    const options: GuardOptions = {
+      backend,
+      rules: [deny({ tools: "testTool", description: "Rules deny" })],
+    };
+    const decision = await evaluatePolicy(ctx(), options);
+    expect(decision.verdict).toBe("deny");
+  });
+
+  it("does not de-escalate from backend deny to rules allow", async () => {
+    const backend: PolicyBackend = {
+      name: "test-backend",
+      async evaluate() {
+        return {
+          verdict: "deny",
+          reason: "Backend denies",
+          matchedRules: ["b1"],
+        };
+      },
+    };
+    const options: GuardOptions = {
+      backend,
+      rules: [allow({ tools: "testTool" })],
+    };
+    const decision = await evaluatePolicy(ctx(), options);
+    expect(decision.verdict).toBe("deny");
+  });
+
+  it("evaluates conversation-aware condition", async () => {
+    const options: GuardOptions = {
+      rules: [
+        deny({
+          tools: "testTool",
+          condition: (c) => (c.conversation?.riskScore ?? 0) > 0.8,
+          description: "High risk conversation",
+        }),
+      ],
+    };
+
+    const highRiskCtx = ctx({ conversation: { riskScore: 0.9 } });
+    const lowRiskCtx = ctx({ conversation: { riskScore: 0.5 } });
+
+    const highRiskDecision = await evaluatePolicy(highRiskCtx, options);
+    expect(highRiskDecision.verdict).toBe("deny");
+
+    const lowRiskDecision = await evaluatePolicy(lowRiskCtx, options);
+    expect(lowRiskDecision.verdict).toBe("allow");
+  });
 });
 
 describe("defaultPolicy", () => {
