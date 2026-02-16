@@ -71,4 +71,70 @@ describe("RateLimiter", () => {
     const r = await limiter.acquire("tool", config);
     expect(r.allowed).toBe(true);
   });
+
+  it("queues calls when rate limit is exceeded with queue strategy", async () => {
+    const queueConfig: RateLimitConfig = {
+      maxCalls: 100,
+      windowMs: 10000,
+      strategy: "queue",
+    };
+
+    // First call should be allowed immediately
+    const r1 = await limiter.acquire("tool", queueConfig, 2);
+    expect(r1.allowed).toBe(true);
+
+    // Second call should be allowed (within concurrency limit)
+    const r2 = await limiter.acquire("tool", queueConfig, 2);
+    expect(r2.allowed).toBe(true);
+
+    // Third call should block because concurrency limit is reached
+    let r3Resolved = false;
+    const r3Promise = limiter.acquire("tool", queueConfig, 2).then((result) => {
+      r3Resolved = true;
+      return result;
+    });
+
+    // Give it a moment to ensure it's queued
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(r3Resolved).toBe(false);
+
+    // Release one slot
+    limiter.release("tool");
+
+    // Now the third call should resolve
+    const r3 = await r3Promise;
+    expect(r3.allowed).toBe(true);
+    expect(r3Resolved).toBe(true);
+  });
+
+  it("queues calls when concurrency limit is exceeded with queue strategy", async () => {
+    const queueConfig: RateLimitConfig = {
+      maxCalls: 100,
+      windowMs: 10000,
+      strategy: "queue",
+    };
+
+    // First call should be allowed immediately
+    const r1 = await limiter.acquire("tool", queueConfig, 1);
+    expect(r1.allowed).toBe(true);
+
+    // Second call should block until first is released
+    let r2Resolved = false;
+    const r2Promise = limiter.acquire("tool", queueConfig, 1).then((result) => {
+      r2Resolved = true;
+      return result;
+    });
+
+    // Give it a moment to ensure it's queued
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(r2Resolved).toBe(false);
+
+    // Release the first slot
+    limiter.release("tool");
+
+    // Now the second call should resolve
+    const r2 = await r2Promise;
+    expect(r2.allowed).toBe(true);
+    expect(r2Resolved).toBe(true);
+  });
 });
