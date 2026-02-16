@@ -252,15 +252,14 @@ export class ToolGuard {
         );
       }
 
+      const approvalResult = await this.approvalManager.requestApproval(ctx);
+
       const approvalSpan = startApprovalSpan(
         this.tracer,
         toolName,
-        decision.id,
+        approvalResult.tokenId,
         this.options.otel,
       );
-
-      const approvalResult = await this.approvalManager.requestApproval(ctx);
-
       approvalSpan.setAttribute(
         ATTR.APPROVAL_APPROVED,
         approvalResult.approved,

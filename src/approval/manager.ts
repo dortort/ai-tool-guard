@@ -71,6 +71,7 @@ export class ApprovalManager {
     if (!token) {
       return {
         approved: false,
+        tokenId,
         args: {},
         error: `No pending approval token found for id "${tokenId}". ` +
           "The token may have expired or been resolved already.",
@@ -84,6 +85,7 @@ export class ApprovalManager {
       if (elapsed > token.ttlMs) {
         return {
           approved: false,
+          tokenId,
           args: token.originalArgs,
           error: `Approval token "${tokenId}" expired after ${token.ttlMs}ms.`,
         };
@@ -93,6 +95,7 @@ export class ApprovalManager {
     if (!resolution.approved) {
       return {
         approved: false,
+        tokenId,
         args: token.originalArgs,
         reason: resolution.reason ?? "Approval denied by handler.",
       };
@@ -105,6 +108,7 @@ export class ApprovalManager {
 
     return {
       approved: true,
+      tokenId,
       args: finalArgs,
       patchedFields: resolution.patchedArgs
         ? Object.keys(resolution.patchedArgs)
@@ -122,6 +126,8 @@ export class ApprovalManager {
 /** Result of a full approval flow cycle. */
 export interface ApprovalFlowResult {
   approved: boolean;
+  /** The approval token ID for correlation. */
+  tokenId: string;
   /** The final arguments to use (original or patched). */
   args: Record<string, unknown>;
   /** Fields that were patched by the approver. */
