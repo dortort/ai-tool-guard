@@ -42,6 +42,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "tsc --noEmit",
+    "docs:build": "mkdocs build --strict",
+    "docs:serve": "mkdocs serve",
     "prepublishOnly": "npm run build"
   },
   "repository": {
