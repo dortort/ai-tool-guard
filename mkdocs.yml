@@ -1,0 +1,91 @@
+site_name: ai-tool-guard
+site_url: https://ai-tool-guard.readthedocs.io
+site_description: Policy enforcement middleware for Vercel AI SDK tool calls
+site_author: Francis Eytan Dortort
+repo_url: https://github.com/dortort/ai-tool-guard
+repo_name: dortort/ai-tool-guard
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.tabs
+    - navigation.top
+    - content.code.copy
+    - content.code.annotate
+    - search.highlight
+    - search.suggest
+    - toc.follow
+  icon:
+    repo: fontawesome/brands/github
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.snippets
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quick-start.md
+    - Core Concepts: getting-started/concepts.md
+  - Guides:
+    - Policy Engine: guides/policy-engine.md
+    - Preset Policies: guides/preset-policies.md
+    - External Backends: guides/external-backends.md
+    - Approval Workflows: guides/approval-workflows.md
+    - Argument Validation: guides/argument-validation.md
+    - Injection Detection: guides/injection-detection.md
+    - Output Filtering: guides/output-filtering.md
+    - Rate Limiting: guides/rate-limiting.md
+    - OpenTelemetry: guides/opentelemetry.md
+    - MCP Drift Detection: guides/mcp-drift-detection.md
+    - Simulation & Dry-Run: guides/simulation.md
+    - Conversation-Aware Policies: guides/conversation-aware-policies.md
+    - Error Handling: guides/error-handling.md
+    - Decision Records: guides/decision-records.md
+  - API Reference:
+    - Overview: api/index.md
+    - Core: api/core.md
+    - Policy: api/policy.md
+    - Approval: api/approval.md
+    - Guards: api/guards.md
+    - OpenTelemetry: api/otel.md
+    - MCP: api/mcp.md
+    - Types: api/types.md
+  - Examples:
+    - Next.js Integration: examples/nextjs-integration.md
+    - Chatbot Safety: examples/chatbot-safety.md
+    - Multi-Tenant Policies: examples/multi-tenant.md
+    - Audit Logging: examples/audit-logging.md
