@@ -211,7 +211,7 @@ try {
   await wrappedDelete.execute(args);
 } catch (err) {
   if (err instanceof ToolGuardError && err.code === "rate-limited") {
-    console.warn(`Rate limited. Retry after ${err.retryAfterMs}ms`);
+    console.warn(`Rate limited: ${err.message}`);
   }
 }
 ```
