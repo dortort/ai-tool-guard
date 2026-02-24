@@ -214,7 +214,7 @@ const guard = createToolGuard({
   onDecision: (record) => auditLog.write(record),
 });
 
-const safeTool = guardTool(myTool, {
+const safeTool = guard.guardTool("myTool", myTool, {
   // ToolGuardConfig — applies only to myTool
   riskLevel: "medium",
   riskCategories: ["data-write", "network"],
