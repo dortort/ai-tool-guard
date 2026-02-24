@@ -132,7 +132,7 @@ Tool call invoked
 
 3. **Policy evaluation** — The guard evaluates all matching rules (built-in defaults, custom rules, and responses from any configured external backend) and resolves a final verdict using escalation semantics.
 
-4. **Approval flow** — If the resolved verdict is `require-approval`, execution pauses and the `onApprovalRequired` callback is invoked. The callback receives the full decision context and must return `"approved"` or `"denied"` to continue or abort.
+4. **Approval flow** — If the resolved verdict is `require-approval`, execution pauses and the `onApprovalRequired` callback is invoked. The callback receives an `ApprovalToken` with the full decision context and must return an `ApprovalResolution` object (`{ approved: boolean, patchedArgs?, approvedBy? }`) to continue or abort.
 
 5. **Rate limiting** — A sliding window counter checks whether the tool has exceeded its configured call rate. A concurrency check verifies that the tool is not already executing more instances than the configured maximum. Either failure produces a `deny` verdict.
 
@@ -210,7 +210,7 @@ Passed per-tool via `guardTool()` or as values in the `guardTools()` map. Overri
 ```typescript
 const guard = createToolGuard({
   // GuardOptions — applies to every tool
-  rules: [defaultPolicy()],
+  rules: defaultPolicy(),
   onDecision: (record) => auditLog.write(record),
 });
 
@@ -218,8 +218,8 @@ const safeTool = guard.guardTool("myTool", myTool, {
   // ToolGuardConfig — applies only to myTool
   riskLevel: "medium",
   riskCategories: ["data-write", "network"],
-  argGuards: {
-    email: { pii: true },
-  },
+  argGuards: [
+    piiGuard("email"),
+  ],
 });
 ```
