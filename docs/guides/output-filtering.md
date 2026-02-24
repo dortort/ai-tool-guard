@@ -15,10 +15,12 @@ Redacted field names are accumulated across all filters and recorded in the `Dec
 ## Basic Usage
 
 ```typescript
-import { createGuard, guardTool } from "ai-tool-guard";
+import { createToolGuard } from "ai-tool-guard";
 import { piiOutputFilter, secretsFilter } from "ai-tool-guard/guards";
 
-const wrappedUserLookup = guardTool(userLookupTool, {
+const guard = createToolGuard();
+
+const wrappedUserLookup = guard.guardTool("userLookup", userLookupTool, {
   riskLevel: "high",
   riskCategories: ["data-read", "pii"],
   outputFilters: [
@@ -175,9 +177,12 @@ For rules with a `validate` function (currently credit-card Luhn validation), a 
 Prevent large tool results from being fed back to the model, which could exhaust context or be used for exfiltration:
 
 ```typescript
+import { createToolGuard } from "ai-tool-guard";
 import { customFilter, secretsFilter } from "ai-tool-guard/guards";
 
-const wrappedFileTool = guardTool(readFileTool, {
+const guard = createToolGuard();
+
+const wrappedFileTool = guard.guardTool("readFile", readFileTool, {
   riskLevel: "medium",
   outputFilters: [
     secretsFilter(),

@@ -13,9 +13,9 @@ When a limit is exceeded, the behaviour depends on the configured strategy: eith
 Set global defaults on `GuardOptions` and override per tool as needed:
 
 ```typescript
-import { createGuard, guardTool } from "ai-tool-guard";
+import { createToolGuard } from "ai-tool-guard";
 
-const guard = createGuard({
+const guard = createToolGuard({
   rules: [{ id: "allow-all", toolPatterns: ["*"], verdict: "allow" }],
 
   // Global defaults applied to every tool.
@@ -28,7 +28,7 @@ const guard = createGuard({
 });
 
 // This tool gets its own tighter limits.
-const wrappedExpensiveTool = guardTool(llmSummarizeTool, {
+const wrappedExpensiveTool = guard.guardTool("llmSummarize", llmSummarizeTool, {
   riskLevel: "medium",
   rateLimit: {
     maxCalls: 5,
@@ -152,9 +152,11 @@ limiter.reset();
 Cap calls to a third-party API that bills per request, and queue excess calls rather than dropping them:
 
 ```typescript
-import { guardTool } from "ai-tool-guard";
+import { createToolGuard } from "ai-tool-guard";
 
-const wrappedOcrTool = guardTool(ocrApiTool, {
+const guard = createToolGuard();
+
+const wrappedOcrTool = guard.guardTool("ocrApi", ocrApiTool, {
   riskLevel: "medium",
   rateLimit: {
     maxCalls: 100,
@@ -172,9 +174,9 @@ With this configuration, calls beyond the 100/min window wait in the queue. As c
 AI agents can enter feedback loops where a tool result causes the model to call the same tool repeatedly. A tight rate limit on high-risk tools breaks these loops before they cause damage:
 
 ```typescript
-import { createGuard, guardTool } from "ai-tool-guard";
+import { createToolGuard } from "ai-tool-guard";
 
-const guard = createGuard({
+const guard = createToolGuard({
   rules: [
     {
       id: "require-approval-high",
@@ -190,7 +192,7 @@ const guard = createGuard({
   },
 });
 
-const wrappedDelete = guardTool(deleteRecordTool, {
+const wrappedDelete = guard.guardTool("deleteRecord", deleteRecordTool, {
   riskLevel: "critical",
   riskCategories: ["data-delete"],
   rateLimit: {
