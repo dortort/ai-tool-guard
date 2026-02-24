@@ -13,15 +13,15 @@ Guards target individual fields via dot-path strings (`"query"`, `"config.region
 Attach guards to a tool using the `argGuards` array on `ToolGuardConfig`:
 
 ```typescript
-import { createGuard, guardTool } from "ai-tool-guard";
+import { createToolGuard } from "ai-tool-guard";
 import { allowlist, denylist, piiGuard, zodGuard } from "ai-tool-guard/guards";
 import { z } from "zod";
 
-const guard = createGuard({
+const guard = createToolGuard({
   rules: [{ id: "allow-all", toolPatterns: ["*"], verdict: "allow" }],
 });
 
-const wrappedQuery = guardTool(myDbQueryTool, {
+const wrappedQuery = guard.guardTool("myDbQuery", myDbQueryTool, {
   riskLevel: "high",
   argGuards: [
     zodGuard({ field: "limit", schema: z.number().int().min(1).max(1000) }),
@@ -222,7 +222,7 @@ Guards are always run to completion — all guards are evaluated even after a vi
 Layer multiple guards to enforce types, restrict targets, and prevent PII leakage in query text:
 
 ```typescript
-import { guardTool } from "ai-tool-guard";
+import { createToolGuard } from "ai-tool-guard";
 import {
   allowlist,
   denylist,
@@ -232,7 +232,9 @@ import {
 } from "ai-tool-guard/guards";
 import { z } from "zod";
 
-const wrappedDbQuery = guardTool(dbQueryTool, {
+const guard = createToolGuard();
+
+const wrappedDbQuery = guard.guardTool("dbQuery", dbQueryTool, {
   riskLevel: "high",
   riskCategories: ["data-read"],
   argGuards: [

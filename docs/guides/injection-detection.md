@@ -7,9 +7,9 @@ Prompt injection is the primary attack vector against AI agents: an adversary em
 The injection check runs first in the evaluation pipeline. It scores the tool arguments for adversarial patterns and, depending on configuration, either blocks the call outright, downgrades it to require human approval, or logs it and proceeds. The check is optional and opt-in: configure `injectionDetection` on `GuardOptions` to enable it.
 
 ```typescript
-import { createGuard } from "ai-tool-guard";
+import { createToolGuard } from "ai-tool-guard";
 
-const guard = createGuard({
+const guard = createToolGuard({
   rules: [{ id: "allow-low", toolPatterns: ["*"], verdict: "allow" }],
   injectionDetection: {
     threshold: 0.5,
@@ -23,9 +23,9 @@ const guard = createGuard({
 Pass an `InjectionDetectorConfig` as `injectionDetection` in `GuardOptions`. The check applies to every tool call managed by that guard instance.
 
 ```typescript
-import { createGuard } from "ai-tool-guard";
+import { createToolGuard } from "ai-tool-guard";
 
-const guard = createGuard({
+const guard = createToolGuard({
   rules: [/* ... */],
   injectionDetection: {
     threshold: 0.6,   // suspicion score required to trigger
@@ -95,9 +95,9 @@ The final score is clamped to `[0, 1]`.
 Replace the built-in heuristic with your own scoring function — including an LLM-as-judge approach — by providing `detect`:
 
 ```typescript
-import { createGuard } from "ai-tool-guard";
+import { createToolGuard } from "ai-tool-guard";
 
-const guard = createGuard({
+const guard = createToolGuard({
   injectionDetection: {
     threshold: 0.7,
     action: "deny",
@@ -148,9 +148,9 @@ This ordering means an injection-flagged call never reaches policy evaluation or
 For tools that accept user-controlled input directly, use a low threshold and the `deny` action:
 
 ```typescript
-import { createGuard, guardTool } from "ai-tool-guard";
+import { createToolGuard } from "ai-tool-guard";
 
-const guard = createGuard({
+const guard = createToolGuard({
   rules: [{ id: "default-allow", toolPatterns: ["*"], verdict: "allow" }],
   injectionDetection: {
     threshold: 0.4,  // Lower than default — fail safe for public exposure.
@@ -159,7 +159,7 @@ const guard = createGuard({
 });
 
 // This tool accepts raw user text, so strict injection blocking applies.
-const wrappedSearch = guardTool(searchTool, { riskLevel: "medium" });
+const wrappedSearch = guard.guardTool("search", searchTool, { riskLevel: "medium" });
 ```
 
 ### Relaxed Monitoring for Internal Tools
@@ -167,7 +167,7 @@ const wrappedSearch = guardTool(searchTool, { riskLevel: "medium" });
 For tools called from trusted internal services, use `"log"` to collect data without blocking:
 
 ```typescript
-const guard = createGuard({
+const guard = createToolGuard({
   rules: [{ id: "internal-allow", toolPatterns: ["internal.*"], verdict: "allow" }],
   injectionDetection: {
     threshold: 0.5,
@@ -186,9 +186,9 @@ const guard = createGuard({
 For high-risk tools, route suspected injections to a human approver rather than blocking outright:
 
 ```typescript
-import { createGuard, guardTool } from "ai-tool-guard";
+import { createToolGuard } from "ai-tool-guard";
 
-const guard = createGuard({
+const guard = createToolGuard({
   injectionDetection: {
     threshold: 0.5,
     action: "downgrade",  // Converts verdict to require-approval.
@@ -199,7 +199,7 @@ const guard = createGuard({
   },
 });
 
-const wrappedDeleteTool = guardTool(deleteRecordTool, {
+const wrappedDeleteTool = guard.guardTool("deleteRecord", deleteRecordTool, {
   riskLevel: "critical",
   riskCategories: ["data-delete"],
 });
