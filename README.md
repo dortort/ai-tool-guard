@@ -58,27 +58,27 @@ const result = await generateText({
 
 ## Features
 
-| Feature | Description | Requirement |
-|---------|-------------|-------------|
-| **Policy engine** | Rule-based allow/deny/require-approval with glob patterns, risk levels, priorities, and async conditions | #1 |
-| **External policy backends** | Adapter interface for OPA/Rego, Cedar, or custom ABAC engines | #1 |
-| **Decision records** | Structured audit output for every evaluation (matched rules, risk category, attributes, redactions) | #2 |
-| **Dry-run / simulation** | Evaluate policies across recorded traces without executing tools | #3 |
-| **Conversation-aware policies** | Policies can incorporate session risk score, prior failures, recent approvals | #4 |
-| **Approve with edits** | Approval handler can patch arguments before execution | #5 |
-| **Approval correlation** | Payload-hash tokens with TTL prevent mismatch between request and resolution | #6 |
-| **Argument guards** | Zod schemas, allowlists, denylists, regex, PII scanning per field | #8 |
-| **Injection detection** | Heuristic prompt-injection detector that can deny or downgrade to approval | #9 |
-| **Output filtering** | Secrets stripping, PII redaction, custom filters on tool results | #10 |
-| **Rate limiting** | Sliding-window rate limits + concurrency caps with reject or queue backpressure | #11 |
-| **OpenTelemetry** | Opinionated spans for policy eval, approval wait, tool execution, redaction | #12 |
-| **MCP drift detection** | SHA-256 schema fingerprinting, drift detection, actionable remediation | #15 |
+| Feature | Description |
+|---------|-------------|
+| **Policy engine** | Rule-based allow/deny/require-approval with glob patterns, risk levels, priorities, and async conditions |
+| **External policy backends** | Adapter interface for OPA/Rego, Cedar, or custom ABAC engines |
+| **Decision records** | Structured audit output for every evaluation (matched rules, risk category, attributes, redactions) |
+| **Dry-run / simulation** | Evaluate policies across recorded traces without executing tools |
+| **Conversation-aware policies** | Policies can incorporate session risk score, prior failures, recent approvals |
+| **Approve with edits** | Approval handler can patch arguments before execution |
+| **Approval correlation** | Payload-hash tokens with TTL prevent mismatch between request and resolution |
+| **Argument guards** | Zod schemas, allowlists, denylists, regex, PII scanning per field |
+| **Injection detection** | Heuristic prompt-injection detector that can deny or downgrade to approval |
+| **Output filtering** | Secrets stripping, PII redaction, custom filters on tool results |
+| **Rate limiting** | Sliding-window rate limits + concurrency caps with reject or queue backpressure |
+| **OpenTelemetry** | Opinionated spans for policy eval, approval wait, tool execution, redaction |
+| **MCP drift detection** | SHA-256 schema fingerprinting, drift detection, actionable remediation |
 
 ## Architecture
 
 ```
                     ┌─────────────────────────────────────────┐
-                    │          createToolGuard(options)        │
+                    │        createToolGuard(options)          │
                     └──────────────┬──────────────────────────┘
                                    │
             ┌──────────────────────┼──────────────────────┐
@@ -90,7 +90,7 @@ const result = await generateText({
               ┌─── Execution Pipeline ───┐                │
               │                          │                │
               │  1. Injection detection  │     ┌──────────┴─────┐
-              │  2. Argument validation  │     │  PolicyBackend  │
+              │  2. Argument validation  │     │  PolicyBackend │
               │  3. Policy evaluation ◄──┼─────┤  (OPA, Cedar)  │
               │  4. Approval flow        │     └────────────────┘
               │  5. Rate limiting        │
@@ -565,14 +565,14 @@ try {
 } catch (err) {
   if (err instanceof ToolGuardError) {
     switch (err.code) {
-      case "policy-denied":        // Policy rule blocked the call
-      case "approval-denied":      // Human denied approval
-      case "no-approval-handler":  // Approval required but no handler set
+      case "policy-denied":         // Policy rule blocked the call
+      case "approval-denied":       // Human denied approval
+      case "no-approval-handler":   // Approval required but no handler set
       case "arg-validation-failed": // Argument guard failed
-      case "injection-detected":   // Prompt injection suspected
-      case "rate-limited":         // Rate limit exceeded
-      case "output-blocked":       // Output filter blocked the result
-      case "mcp-drift":           // MCP schema drift detected
+      case "injection-detected":    // Prompt injection suspected
+      case "rate-limited":          // Rate limit exceeded
+      case "output-blocked":        // Output filter blocked the result
+      case "mcp-drift":             // MCP schema drift detected
     }
     console.log(err.toolName);   // Which tool
     console.log(err.decision);   // Full DecisionRecord (if available)
