@@ -95,7 +95,7 @@ graph TD
     B --> E["Execution Pipeline"]
     C --> E
 
-    D --> F["PolicyBackend\n(OPA, Cedar)"]
+    D --> F["PolicyBackend<br/>(OPA, Cedar)"]
 
     E --> E1["1. Injection detection"]
     E1 --> E2["2. Argument validation"]
