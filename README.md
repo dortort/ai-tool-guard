@@ -86,30 +86,9 @@ const result = await generateText({
 
 ## Architecture
 
-```mermaid
-graph TD
-    A["createToolGuard(options)"] --> B["guardTool(name, tool, cfg)"]
-    A --> C["guardTools({...})"]
-    A --> D["(config)"]
+Every guarded tool call passes through a 7-stage execution pipeline: injection detection, argument validation, policy evaluation, approval flow, rate limiting, tool execution, and output filtering. Each stage emits an OpenTelemetry span.
 
-    B --> E["Execution Pipeline"]
-    C --> E
-
-    D --> F["PolicyBackend<br/>(OPA, Cedar)"]
-
-    E --> E1["1. Injection detection"]
-    E1 --> E2["2. Argument validation"]
-    E2 --> E3["3. Policy evaluation"]
-    E3 --> E4["4. Approval flow"]
-    E4 --> E5["5. Rate limiting"]
-    E5 --> E6["6. Tool execution"]
-    E6 --> E7["7. Output filtering"]
-
-    F -.-> E3
-
-    style E fill:#f0f0f0,stroke:#333
-    style F fill:#f0f0f0,stroke:#333
-```
+See the **[architecture overview](https://ai-tool-guard.readthedocs.io/#architecture)** for the full pipeline diagram.
 
 ## API reference
 
