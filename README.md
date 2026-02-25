@@ -1,5 +1,12 @@
 # ai-tool-guard
 
+[![CI](https://github.com/dortort/ai-tool-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/dortort/ai-tool-guard/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/ai-tool-guard)](https://www.npmjs.com/package/ai-tool-guard)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js](https://img.shields.io/badge/Node.js-%E2%89%A520-green?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Vercel AI SDK](https://img.shields.io/badge/Vercel_AI_SDK-%E2%89%A54.0-black?logo=vercel&logoColor=white)](https://sdk.vercel.ai)
+
 Policy enforcement middleware for [Vercel AI SDK](https://sdk.vercel.ai) tool calls.
 
 Guards, approvals, argument validation, rate limiting, output filtering, prompt-injection detection, MCP drift detection, and OpenTelemetry observability — as a composable middleware layer around your AI SDK tools.
