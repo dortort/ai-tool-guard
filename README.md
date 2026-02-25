@@ -6,6 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-%E2%89%A520-green?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Vercel AI SDK](https://img.shields.io/badge/Vercel_AI_SDK-%E2%89%A54.0-black?logo=vercel&logoColor=white)](https://sdk.vercel.ai)
+[![Docs](https://readthedocs.org/projects/ai-tool-guard/badge/?version=latest)](https://ai-tool-guard.readthedocs.io/)
 
 Policy enforcement middleware for [Vercel AI SDK](https://sdk.vercel.ai) tool calls.
 
