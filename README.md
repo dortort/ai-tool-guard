@@ -12,6 +12,8 @@ Policy enforcement middleware for [Vercel AI SDK](https://sdk.vercel.ai) tool ca
 
 Guards, approvals, argument validation, rate limiting, output filtering, prompt-injection detection, MCP drift detection, and OpenTelemetry observability — as a composable middleware layer around your AI SDK tools.
 
+**[Read the full documentation](https://ai-tool-guard.readthedocs.io/)**
+
 ```
 npm install ai-tool-guard
 ```
