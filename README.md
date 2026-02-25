@@ -86,30 +86,29 @@ const result = await generateText({
 
 ## Architecture
 
-```
-                    ┌────────────────────────────────────────┐
-                    │       createToolGuard(options)          │
-                    └──────────────┬─────────────────────────┘
-                                   │
-            ┌──────────────────────┼──────────────────────┐
-            │                      │                      │
-    guardTool(name,tool,cfg) guardTools({...})       (config)
-            │                      │                      │
-            └──────────┬───────────┘                      │
-                       ▼                                  │
-              ┌─── Execution Pipeline ───┐                │
-              │                          │                │
-              │  1. Injection detection  │     ┌──────────┴─────┐
-              │  2. Argument validation  │     │  PolicyBackend │
-              │  3. Policy evaluation ◄──┼─────┤  (OPA, Cedar)  │
-              │  4. Approval flow        │     └────────────────┘
-              │  5. Rate limiting        │
-              │  6. Tool execution       │
-              │  7. Output filtering     │
-              │                          │
-              │   OTel spans emitted     │
-              │   at each step           │
-              └──────────────────────────┘
+```mermaid
+graph TD
+    A["createToolGuard(options)"] --> B["guardTool(name, tool, cfg)"]
+    A --> C["guardTools({...})"]
+    A --> D["(config)"]
+
+    B --> E["Execution Pipeline"]
+    C --> E
+
+    D --> F["PolicyBackend\n(OPA, Cedar)"]
+
+    E --> E1["1. Injection detection"]
+    E1 --> E2["2. Argument validation"]
+    E2 --> E3["3. Policy evaluation"]
+    E3 --> E4["4. Approval flow"]
+    E4 --> E5["5. Rate limiting"]
+    E5 --> E6["6. Tool execution"]
+    E6 --> E7["7. Output filtering"]
+
+    F -.-> E3
+
+    style E fill:#f0f0f0,stroke:#333
+    style F fill:#f0f0f0,stroke:#333
 ```
 
 ## API reference
