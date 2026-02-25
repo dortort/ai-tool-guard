@@ -44,30 +44,30 @@ npm install ai-tool-guard
 The execution pipeline wraps each tool call in a series of composable stages:
 
 ```
- ┌─────────────────────────────────────────────────────────────────┐
- │                        createToolGuard                          │
+ ┌──────────────────────────────────────────────────────────────────┐
+ │                        createToolGuard                           │
  │                    (configuration & backends)                    │
- └──────────────────────────────┬──────────────────────────────────┘
+ └──────────────────────────────┬───────────────────────────────────┘
                                 │
                ┌────────────────▼────────────────┐
-               │        guardTool / guardTools    │
-               │    (wraps Vercel AI SDK tools)   │
+               │     guardTool / guardTools      │
+               │ (wraps Vercel AI SDK tools)     │
                └────────────────┬────────────────┘
                                 │
                ┌────────────────▼────────────────┐
-               │            Pipeline              │
-               │                                  │
-               │  1. Injection detection          │◄── OTel span
-               │  2. Argument validation          │◄── OTel span
-               │  3. Policy evaluation            │◄── PolicyBackend
-               │     ├─ allow                     │
-               │     ├─ block ──────────────────► │ DecisionRecord
-               │     └─ require-approval ───────► │ ApprovalRequest
-               │  4. Approval flow                │◄── OTel span
-               │     └─ approve / edit / deny     │
-               │  5. Rate limit check             │◄── OTel span
-               │  6. Tool execution               │◄── OTel span
-               │  7. Output filtering             │◄── OTel span
+               │           Pipeline              │
+               │                                 │
+               │  1. Injection detection         │◄── OTel span
+               │  2. Argument validation         │◄── OTel span
+               │  3. Policy evaluation           │◄── PolicyBackend
+               │     ├─ allow                    │
+               │     ├─ block ─────────────────► │ DecisionRecord
+               │     └─ require-approval ──────► │ ApprovalRequest
+               │  4. Approval flow               │◄── OTel span
+               │     └─ approve / edit / deny    │
+               │  5. Rate limit check            │◄── OTel span
+               │  6. Tool execution              │◄── OTel span
+               │  7. Output filtering            │◄── OTel span
                └────────────────┬────────────────┘
                                 │
                     ┌───────────▼───────────┐
