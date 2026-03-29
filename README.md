@@ -107,9 +107,9 @@ interface GuardOptions {
   defaultMaxConcurrency?: number;
   otel?: OtelConfig;
   dryRun?: boolean;               // Simulation mode
-  onDecision?: (record: DecisionRecord) => void;
-  resolveUserAttributes?: () => Record<string, unknown>;
-  resolveConversationContext?: () => ConversationContext;
+  onDecision?: (record: DecisionRecord) => void | Promise<void>;
+  resolveUserAttributes?: () => Record<string, unknown> | Promise<Record<string, unknown>>;
+  resolveConversationContext?: () => ConversationContext | Promise<ConversationContext>;
 }
 ```
 
@@ -231,7 +231,7 @@ onApprovalRequired: async (token) => {
 },
 ```
 
-The `ApprovalToken` includes a `payloadHash` for correlation — the SHA-256 of the canonical tool call payload. This prevents mismatch bugs when message history is reshaped.
+The `ApprovalToken` includes a `payloadHash` for correlation — the SHA-256 of the canonical `{ toolName, args }` object. This prevents mismatch bugs when message history is reshaped.
 
 ---
 
@@ -308,7 +308,7 @@ const guarded = guard.guardTool("fetchData", fetchTool, {
 });
 ```
 
-Filters run in order. If any filter returns `"block"`, execution stops and a `ToolGuardError` is thrown.
+Filters run in order after tool execution. If any filter returns `"block"`, the filter chain stops, the tool result is discarded, and a `ToolGuardError` is thrown.
 
 ---
 
@@ -549,10 +549,12 @@ All guard failures throw `ToolGuardError` with a machine-readable `code`:
 import { ToolGuardError } from "ai-tool-guard";
 
 try {
-  await guardedTool.execute(args, options);
+  await generateText({ model, tools, prompt: "..." });
 } catch (err) {
-  if (err instanceof ToolGuardError) {
-    switch (err.code) {
+  // AI SDK wraps tool errors in ToolExecutionError — unwrap with .cause
+  const cause = err instanceof Error ? (err as { cause?: unknown }).cause : err;
+  if (cause instanceof ToolGuardError) {
+    switch (cause.code) {
       case "policy-denied":         // Policy rule blocked the call
       case "approval-denied":       // Human denied approval
       case "no-approval-handler":   // Approval required but no handler set
@@ -562,8 +564,8 @@ try {
       case "output-blocked":        // Output filter blocked the result
       case "mcp-drift":             // MCP schema drift detected
     }
-    console.log(err.toolName);   // Which tool
-    console.log(err.decision);   // Full DecisionRecord (if available)
+    console.log(cause.toolName);   // Which tool
+    console.log(cause.decision);   // Full DecisionRecord (if available)
   }
 }
 ```
@@ -607,6 +609,17 @@ import { zodGuard, secretsFilter, RateLimiter } from "ai-tool-guard/guards";
 import { createTracer, ATTR } from "ai-tool-guard/otel";
 import { detectDrift, FingerprintStore } from "ai-tool-guard/mcp";
 ```
+
+## Examples
+
+Full worked examples are available in the [documentation](https://ai-tool-guard.readthedocs.io/):
+
+- **[Next.js Integration](https://ai-tool-guard.readthedocs.io/examples/nextjs-integration/)** — App Router setup with per-tool config, approval flow, and error mapping
+- **[Chatbot Safety](https://ai-tool-guard.readthedocs.io/examples/chatbot-safety/)** — Multi-layered defense for a customer support chatbot (5 risk levels, injection detection, PII redaction)
+- **[Multi-Tenant Policies](https://ai-tool-guard.readthedocs.io/examples/multi-tenant/)** — SaaS platform with plan/role-based access and per-tenant audit logs
+- **[Audit Logging](https://ai-tool-guard.readthedocs.io/examples/audit-logging/)** — Structured audit system with denial alerting and OpenTelemetry correlation
+- **[MCP Drift Detection](https://ai-tool-guard.readthedocs.io/examples/mcp-drift-detection/)** — Schema fingerprinting, drift detection, and environment-scoped pinning
+- **[Simulation & Testing](https://ai-tool-guard.readthedocs.io/examples/simulation-testing/)** — Policy validation with recorded traces and CI/CD integration
 
 ## License
 
