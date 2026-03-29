@@ -89,3 +89,5 @@ nav:
     - Chatbot Safety: examples/chatbot-safety.md
     - Multi-Tenant Policies: examples/multi-tenant.md
     - Audit Logging: examples/audit-logging.md
+    - MCP Drift Detection: examples/mcp-drift-detection.md
+    - Simulation & Testing: examples/simulation-testing.md
