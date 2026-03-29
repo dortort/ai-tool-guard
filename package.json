@@ -40,6 +40,8 @@
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
+    "test:e2e": "vitest run --config vitest.config.e2e.ts",
+    "test:all": "vitest run && vitest run --config vitest.config.e2e.ts",
     "test:watch": "vitest",
     "lint": "tsc --noEmit",
     "docs:build": "mkdocs build --strict",
