@@ -1,4 +1,6 @@
-# ai-tool-guard
+<p align="center">
+  <img src="hero.png" alt="AI Tool Guard" width="600" />
+</p>
 
 [![CI](https://github.com/dortort/ai-tool-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/dortort/ai-tool-guard/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/ai-tool-guard)](https://www.npmjs.com/package/ai-tool-guard)
