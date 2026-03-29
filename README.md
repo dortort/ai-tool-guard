@@ -3,7 +3,7 @@
 </p>
 
 [![CI](https://github.com/dortort/ai-tool-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/dortort/ai-tool-guard/actions/workflows/ci.yml)
-[![npm version](https://img.shields.io/npm/v/ai-tool-guard)](https://www.npmjs.com/package/ai-tool-guard)
+[![npm version](https://img.shields.io/npm/v/@dortort/ai-tool-guard)](https://www.npmjs.com/package/@dortort/ai-tool-guard)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-%E2%89%A520-green?logo=node.js&logoColor=white)](https://nodejs.org/)
@@ -17,13 +17,13 @@ Guards, approvals, argument validation, rate limiting, output filtering, prompt-
 **[Read the full documentation](https://ai-tool-guard.readthedocs.io/)**
 
 ```
-npm install ai-tool-guard
+npm install @dortort/ai-tool-guard
 ```
 
 ## Quick start
 
 ```ts
-import { createToolGuard, deny, requireApproval, defaultPolicy } from "ai-tool-guard";
+import { createToolGuard, deny, requireApproval, defaultPolicy } from "@dortort/ai-tool-guard";
 import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { tool } from "ai";
@@ -149,7 +149,7 @@ const tools = guard.guardTools({
 ### Built-in rule builders
 
 ```ts
-import { allow, deny, requireApproval } from "ai-tool-guard";
+import { allow, deny, requireApproval } from "@dortort/ai-tool-guard";
 
 const rules = [
   allow({ tools: "read*", description: "Allow all read tools" }),
@@ -166,7 +166,7 @@ const rules = [
 ### Preset policies
 
 ```ts
-import { defaultPolicy, readOnlyPolicy } from "ai-tool-guard";
+import { defaultPolicy, readOnlyPolicy } from "@dortort/ai-tool-guard";
 
 // low → allow, medium → require-approval, high/critical → deny
 const rules = defaultPolicy();
@@ -178,7 +178,7 @@ const rules = readOnlyPolicy(["getUser", "listItems", "search*"]);
 ### External policy backend (OPA, Cedar, custom)
 
 ```ts
-import type { PolicyBackend } from "ai-tool-guard";
+import type { PolicyBackend } from "@dortort/ai-tool-guard";
 
 const opaBackend: PolicyBackend = {
   name: "opa",
@@ -244,7 +244,7 @@ Validate tool arguments before policy evaluation.
 ```ts
 import {
   zodGuard, allowlist, denylist, regexGuard, piiGuard
-} from "ai-tool-guard";
+} from "@dortort/ai-tool-guard";
 import { z } from "zod";
 
 const guarded = guard.guardTool("queryDb", queryTool, {
@@ -288,7 +288,7 @@ allowlist("config.region", ["us-east-1", "eu-west-1"])
 Control what comes back from tool execution.
 
 ```ts
-import { secretsFilter, piiOutputFilter, customFilter } from "ai-tool-guard";
+import { secretsFilter, piiOutputFilter, customFilter } from "@dortort/ai-tool-guard";
 
 const guarded = guard.guardTool("fetchData", fetchTool, {
   outputFilters: [
@@ -381,7 +381,7 @@ const guard = createToolGuard({ dryRun: true, rules: [...] });
 ### Trace simulation
 
 ```ts
-import { simulate } from "ai-tool-guard";
+import { simulate } from "@dortort/ai-tool-guard";
 
 const result = await simulate(
   [
@@ -478,7 +478,7 @@ Pin tool schemas and detect when MCP servers change.
 ```ts
 import {
   pinFingerprint, detectDrift, FingerprintStore
-} from "ai-tool-guard/mcp";
+} from "@dortort/ai-tool-guard/mcp";
 
 // Pin fingerprints for your MCP tools
 const store = new FingerprintStore();
@@ -548,7 +548,7 @@ All attribute keys are exported as `ATTR` for custom span creation.
 All guard failures throw `ToolGuardError` with a machine-readable `code`:
 
 ```ts
-import { ToolGuardError } from "ai-tool-guard";
+import { ToolGuardError } from "@dortort/ai-tool-guard";
 
 try {
   await generateText({ model, tools, prompt: "..." });
@@ -599,17 +599,17 @@ import type {
   McpToolFingerprint, McpDriftResult, McpDriftChange,
   // OTel
   OtelConfig,
-} from "ai-tool-guard";
+} from "@dortort/ai-tool-guard";
 ```
 
 ## Subpath exports
 
 ```ts
-import { evaluatePolicy, allow, deny } from "ai-tool-guard/policy";
-import { ApprovalManager } from "ai-tool-guard/approval";
-import { zodGuard, secretsFilter, RateLimiter } from "ai-tool-guard/guards";
-import { createTracer, ATTR } from "ai-tool-guard/otel";
-import { detectDrift, FingerprintStore } from "ai-tool-guard/mcp";
+import { evaluatePolicy, allow, deny } from "@dortort/ai-tool-guard/policy";
+import { ApprovalManager } from "@dortort/ai-tool-guard/approval";
+import { zodGuard, secretsFilter, RateLimiter } from "@dortort/ai-tool-guard/guards";
+import { createTracer, ATTR } from "@dortort/ai-tool-guard/otel";
+import { detectDrift, FingerprintStore } from "@dortort/ai-tool-guard/mcp";
 ```
 
 ## Examples
