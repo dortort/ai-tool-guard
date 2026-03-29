@@ -1,5 +1,5 @@
 {
-  "name": "ai-tool-guard",
+  "name": "@dortort/ai-tool-guard",
   "version": "0.1.0",
   "description": "Policy enforcement middleware for Vercel AI SDK tool calls — guards, approvals, rate limiting, output filtering, and observability.",
   "type": "module",
